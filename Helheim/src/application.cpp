@@ -14,6 +14,7 @@ Helheim::Application* Helheim::Application::getInstance(const AppSpecification& 
     return pApp;
 }
 
+
 Helheim::Application::Application(const AppSpecification& appSpec)
 	: _appSpec(appSpec)
 {
@@ -32,6 +33,7 @@ LRESULT __stdcall Helheim::Application::WndProc(HWND hWnd, UINT msg, WPARAM wPar
     switch (msg)
     {
     case WM_DISPLAYCHANGE:
+
         x = GetSystemMetrics(SM_CXFULLSCREEN);
         y = GetSystemMetrics(SM_CYFULLSCREEN);
         ::SetWindowPos(hWnd, NULL, 0, 0, x, y, SWP_NOZORDER | SWP_NOACTIVATE);
@@ -129,23 +131,62 @@ bool Helheim::Application::Init()
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-    //io.ConfigViewportsNoAutoMerge = true;
-    //io.ConfigViewportsNoTaskBarIcon = true;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+    //io.DisplaySize = ImVec2(ImGui::GetMainViewport()->Size.x * 2.5, ImGui::GetMainViewport()->Size.y * 2.5);
+
+    // Setup Fonts
+    ImFontConfig fontConfig;
+    //fontConfig.MergeMode = true;
+
+    ImFont* roboto = io.Fonts->AddFontFromFileTTF("Roboto-Medium.ttf", 16, &fontConfig);
+
+    io.Fonts->AddFontDefault(&fontConfig);
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
+    //ImGui::StyleColorsDark();
 
-    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-    ImGuiStyle& style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
+    ImGuiStyle& Style = ImGui::GetStyle();
+    auto Color = Style.Colors;
+    Style.WindowBorderSize = 0;
+    Style.ChildRounding = 0;
+    Style.FrameRounding = 1;
+    Style.ScrollbarRounding = 0;
+    Style.GrabRounding = 4;
+    Style.PopupRounding = 0;
+    Style.WindowRounding = 0;
+    Style.WindowTitleAlign = ImVec2(0.5, 0.5);
+
+
+    Color[ImGuiCol_WindowBg] = ImColor(18, 18, 18, 255);
+    Color[ImGuiCol_FrameBg] = ImColor(31, 31, 31, 255);
+    Color[ImGuiCol_FrameBgActive] = ImColor(41, 41, 41, 255);
+    Color[ImGuiCol_FrameBgHovered] = ImColor(41, 41, 41, 255);
+
+    Color[ImGuiCol_TitleBgCollapsed] = ImColor(41, 74, 122, 255);
+
+    Color[ImGuiCol_Button] = ImColor(29, 29, 29, 255);
+    Color[ImGuiCol_ButtonActive] = ImColor(32, 32, 32, 255);
+    Color[ImGuiCol_ButtonHovered] = ImColor(36, 36, 36, 255);
+
+    Color[ImGuiCol_Border] = ImColor(0, 0, 0, 0);
+    Color[ImGuiCol_Separator] = ImColor(36, 36, 36, 255);
+
+    Color[ImGuiCol_ResizeGrip] = ImColor(40, 40, 40, 255);
+    Color[ImGuiCol_ResizeGripActive] = ImColor(156, 156, 156, 255);
+    Color[ImGuiCol_ResizeGripHovered] = ImColor(255, 255, 255, 255);
+
+    Color[ImGuiCol_ChildBg] = ImColor(26, 26, 26, 255);
+
+    Color[ImGuiCol_ScrollbarBg] = ImColor(24, 24, 24, 255);
+    Color[ImGuiCol_ScrollbarGrab] = ImColor(24, 24, 24, 255);
+    Color[ImGuiCol_ScrollbarGrabActive] = ImColor(24, 24, 24, 255);
+    Color[ImGuiCol_ScrollbarGrabActive] = ImColor(24, 24, 24, 255);
+
+    Color[ImGuiCol_Header] = ImColor(39, 39, 39, 255);
+    Color[ImGuiCol_HeaderActive] = ImColor(39, 39, 39, 255);
+    Color[ImGuiCol_HeaderHovered] = ImColor(39, 39, 39, 255);
+    Color[ImGuiCol_CheckMark] = ImColor(66, 150, 250, 255);
+
 
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);
@@ -165,18 +206,17 @@ void Helheim::Application::Destroy()
     std::cout << "Destroed" << std::endl;
 }
 
-void Helheim::Application::RenderLoop()
+void Helheim::Application::RenderLoop(void (*OnRender)(bool& ))
 {
     // Our state
     bool show_demo_window = true;
-    bool show_window = true;
     bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 0.00f);
+    ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     // Main loop
-    bool done = false;
-    while (!done)
+    bool exit = true;
+    while (exit)
     {
         // Poll and handle messages (inputs, window resize, etc.)
         // See the WndProc() function below for our to dispatch events to the Win32 backend.
@@ -186,9 +226,9 @@ void Helheim::Application::RenderLoop()
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
             if (msg.message == WM_QUIT)
-                done = true;
+                exit = false;
         }
-        if (done)
+        if (!exit)
             break;
 
         // Start the Dear ImGui frame
@@ -196,42 +236,7 @@ void Helheim::Application::RenderLoop()
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::Begin("Hello, world!", &show_window, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);                          // Create a window called "Hello, world!" and append into it.
-
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
-        }
+        OnRender(exit);
 
         // Rendering
         ImGui::EndFrame();
@@ -261,7 +266,6 @@ void Helheim::Application::RenderLoop()
             ResetDevice();
     }
     Destroy();
-    std::cout << "Destroed" << std::endl;
 }
 
 #ifndef WM_DPICHANGED

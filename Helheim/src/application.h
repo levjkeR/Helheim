@@ -37,11 +37,11 @@ namespace Helheim
 
 	public:
 		static Application* getInstance(const AppSpecification& appSpec = AppSpecification());
-		Application(Application& const) = delete;
-		Application& operator=(Application const&) = delete;
 
 	private:
 		Application(const AppSpecification& appSpec = AppSpecification());
+		Application(Application& const) = delete;
+		Application& operator=(Application const&) = delete;
 
 	private:
 		static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -52,7 +52,7 @@ namespace Helheim
 		bool Init();
 		void Destroy();
 	public:
-		void RenderLoop();
+		void RenderLoop(void (*OnRender)(bool&));
 
 
 	};

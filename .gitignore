@@ -34,3 +34,5 @@ x64/
 *.exe
 *.out
 *.app
+
+*.ttf

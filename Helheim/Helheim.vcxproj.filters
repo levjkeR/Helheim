@@ -27,9 +27,6 @@
     <ClCompile Include="imgui\imgui_draw.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\imgui_impl_dx11.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="imgui\imgui_tables.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -53,9 +50,6 @@
     <ClInclude Include="imgui\imgui.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imgui_impl_dx11.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="imgui\imgui_internal.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
@@ -77,5 +71,8 @@
     <ClInclude Include="imgui\imgui_impl_win32.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="src\Roboto-Medium.ttf" />
   </ItemGroup>
 </Project>
